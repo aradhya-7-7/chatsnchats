@@ -1,32 +1,13 @@
 import React, { useRef, useState } from 'react';
+import { GoogleAuthProvider } from "firebase/auth";
+import { collection } from "firebase/firestore";
+import { doc } from "firebase/firestore"; 
 import './App.css';
-
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/auth';
-import 'firebase/analytics';
-
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
-
-firebase.initializeApp({
-  apiKey: "AIzaSyANViGINbzs0zGMliUcbtqjCMF74E4dqjE",
-  authDomain: "chatsnchats-0.firebaseapp.com",
-  projectId: "chatsnchats-0",
-  storageBucket: "chatsnchats-0.appspot.com",
-  messagingSenderId: "1039298294261",
-  appId: "1:1039298294261:web:b392be199800c1a42d30bc",
-  measurementId: "G-B7M8FV53PP"
-})
-
-const auth = firebase.auth();
-const firestore = firebase.firestore();
-const analytics = firebase.analytics();
-
+import { auth, db } from './firebase.ts';
 
 function App() {
 
-  const [user] = useAuthState(auth);
+  const [user] = auth;
 
   return (
     <div className="App">
@@ -46,7 +27,7 @@ function App() {
 function SignIn() {
 
   const signInWithGoogle = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
     auth.signInWithPopup(provider);
   }
 
@@ -68,10 +49,10 @@ function SignOut() {
 
 function ChatRoom() {
   const dummy = useRef();
-  const messagesRef = firestore.collection('messages');
+  const messagesRef = doc(db, "messages");
   const query = messagesRef.orderBy('createdAt').limit(25);
 
-  const [messages] = useCollectionData(query, { idField: 'id' });
+  const [messages] = collection(query, { idField: 'id' });
 
   const [formValue, setFormValue] = useState('');
 
@@ -80,6 +61,8 @@ function ChatRoom() {
     e.preventDefault();
 
     const { uid, photoURL } = auth.currentUser;
+    const firebase = require('firebase'); // eslint-disable-line global-require
+    require('firebase/firestore'); // eslint-disable-line global-require
 
     await messagesRef.add({
       text: formValue,
@@ -119,7 +102,7 @@ function ChatMessage(props) {
 
   return (<>
     <div className={`message ${messageClass}`}>
-      <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} />
+      <img src={photoURL || 'https://i.pinimg.com/564x/a3/8e/29/a38e2969bb1864e42cd5dec70e18d2b4.jpg'} alt="Img"/>
       <p>{text}</p>
     </div>
   </>)
